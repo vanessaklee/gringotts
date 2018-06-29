@@ -1,45 +1,15 @@
 defmodule Gringotts.Gateways.Chase do
   @moduledoc """
   [Chase][home] gateway implementation.
-
-  ## Instructions!
   
-  ***This is an example `moduledoc`, and suggests some items that should be
-  documented in here.***
+  ## Supported Chase Complex Type options
 
-  The quotation boxes like the one below will guide you in writing excellent
-  documentation for your gateway. All our gateways are documented in this manner
-  and we aim to keep our docs as consistent with each other as possible.
-  **Please read them and do as they suggest**. Feel free to add or skip sections
-  though.
-
-  If you'd like to make edits to the template docs, they exist at
-  `templates/gateway.eex`. We encourage you to make corrections and open a PR
-  and tag it with the label `template`.
-
-  ***Actual docs begin below this line!***
-  
-  --------------------------------------------------------------------------------
-
-  > List features that have been implemented, and what "actions" they map to as
-  > per the Chase gateway docs.
-  > A table suits really well for this.
-
-  ## Optional or extra parameters
-
-  Most `Gringotts` API calls accept an optional `Keyword` list `opts` to supply
-  optional arguments for transactions with the gateway.
-  
-  > List all available (ie, those that will be supported by this module) keys, a
-  > description of their function/role and whether they have been implemented
-  > and tested.
-  > A table suits really well for this.
+  > Update Token: <AccountUpdater>
+  > Purchase/Refund: <NewOrder>
+  > Token: <Profile>
 
   ## Registering your Chase account at `Gringotts`
 
-  Explain how to make an account with the gateway and show how to put the
-  `required_keys` (like authentication info) to the configuration.
-  
   > Here's how the secrets map to the required configuration parameters for Chase:
   > 
   > | Config parameter | Chase secret   |
@@ -49,6 +19,7 @@ defmodule Gringotts.Gateways.Chase do
   > | `:industry_type`     | **IndustryType**  |
   > | `:merchant_id`     | **MerchantId**  |
   > | `:terminal_id`     | **TerminalId**  |
+  > | ':bin'     | **Bin**     |
   
   > Your Application config **must include the `[:username, :password, :industry_type, :merchant_id, :terminal_id]` field(s)** and would look
   > something like this:
@@ -59,7 +30,32 @@ defmodule Gringotts.Gateways.Chase do
   >         industry_type: "your_secret_industry_type"
   >         merchant_id: "your_secret_merchant_id"
   >         terminal_id: "your_secret_terminal_id"
+  >         bin: "your_secrent_bin"
+
+  ### Definition of Terms
+
+  - Industry Type: The Industry Type for your merchant account can be found by logging into your Orbital Virtual Terminal and viewing the setup for your merchant ID (MID). Alternatively, you can also contact your Chase Orbital Account Executive or Orbital support to determine which default Industry Type is set up for your MID(s).  
+  - Merchant ID: The merchant ID (MID) is the merchant account number assigned to you by Chase Orbital. If you have more than one Merchant ID number, you can set up multiple gateway configurations for each Merchant ID number.
+  - Terminal ID: Merchant Terminal ID assigned by Chase. All Salem Terminal IDs at present must be ‘001’. PNS Terminal ID’s can be from ‘001’ – ‘999’. Most are ‘001’.
+  - Bin: Transaction Routing Definition Assigned by Chase Paymentech, i.e. Salem is 000001 & PNS is 000002 
   
+  ## Process Flow for Chase
+  If the credit card sent on a purchase is an American Express card, authorization is not required. For all other card types, authorization must be completed before purchase.
+  
+  - Amex
+   - purchase
+  - All other card types
+   - authorization
+    - success
+     - purchase
+      - success
+       - succes response
+      - error
+       - report error
+    - error
+     - report error
+
+
   
   ## Scope of this module
 
