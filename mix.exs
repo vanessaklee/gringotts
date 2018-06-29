@@ -12,7 +12,7 @@ defmodule Gringotts.Mixfile do
         licenses: ["MIT"],
         links: %{github: "https://github.com/aviabird/gringotts"}
       ],
-      elixir: ">= 1.5.3",
+      elixir: ">= 1.5.0",
       test_coverage: [
         tool: ExCoveralls
       ],
