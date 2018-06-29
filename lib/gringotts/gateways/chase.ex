@@ -272,7 +272,7 @@ defmodule Gringotts.Gateways.Chase do
 
   # Parses Chase's response and returns a `Gringotts.Response` struct
   # in a `:ok`, `:error` tuple.
-  defp respond(chase.ex_response)
+  # defp respond(chase.ex_response)
   defp respond({:ok, %{status_code: 200, body: body}}), do: "something"
   defp respond({:ok, %{status_code: status_code, body: body}}), do: "something"
   defp respond({:error, %HTTPoison.Error{} = error}), do: "something"
