@@ -20,3 +20,23 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
+
+# CHASE
+
+# Test Credentials
+config :gringotts, Gringotts.Gateways.Chase,
+    username: "INTERLINE22",
+    password: "TRAVELPA55",
+    industry_type: "MO",
+    merchant_id: "your_secret_merchant_id",
+    terminal_id: "001",
+    bin: "000002"
+
+# Production Credentials
+# config :gringotts, Gringotts.Gateways.Chase,
+#     username: "INTVAC564741",
+#     password: "jQkF33L5r3BZ",
+#     industry_type: "MO",
+#     merchant_id: "your_secret_merchant_id",
+#     terminal_id: "001",
+#     bin: "000002"

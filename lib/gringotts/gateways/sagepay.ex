@@ -1,59 +1,61 @@
-defmodule Gringotts.Gateways.Chase do
+defmodule Gringotts.Gateways.Sagepay do
   @moduledoc """
-  [Chase][home] gateway implementation.
+  [Sagepay][home] gateway implementation.
+
+  ## Instructions!
   
-  ## Supported Chase Complex Type options
+  ***This is an example `moduledoc`, and suggests some items that should be
+  documented in here.***
 
-  > Update Token: <AccountUpdater>
-  > Purchase/Refund: <NewOrder>
-  > Token: <Profile>
+  The quotation boxes like the one below will guide you in writing excellent
+  documentation for your gateway. All our gateways are documented in this manner
+  and we aim to keep our docs as consistent with each other as possible.
+  **Please read them and do as they suggest**. Feel free to add or skip sections
+  though.
 
-  ## Registering your Chase account at `Gringotts`
+  If you'd like to make edits to the template docs, they exist at
+  `templates/gateway.eex`. We encourage you to make corrections and open a PR
+  and tag it with the label `template`.
 
-  > Here's how the secrets map to the required configuration parameters for Chase:
+  ***Actual docs begin below this line!***
+  
+  --------------------------------------------------------------------------------
+
+  > List features that have been implemented, and what "actions" they map to as
+  > per the Sagepay gateway docs.
+  > A table suits really well for this.
+
+  ## Optional or extra parameters
+
+  Most `Gringotts` API calls accept an optional `Keyword` list `opts` to supply
+  optional arguments for transactions with the gateway.
+  
+  > List all available (ie, those that will be supported by this module) keys, a
+  > description of their function/role and whether they have been implemented
+  > and tested.
+  > A table suits really well for this.
+
+  ## Registering your Sagepay account at `Gringotts`
+
+  Explain how to make an account with the gateway and show how to put the
+  `required_keys` (like authentication info) to the configuration.
+  
+  > Here's how the secrets map to the required configuration parameters for Sagepay:
   > 
-  > | Config parameter | Chase secret   |
+  > | Config parameter | Sagepay secret   |
   > | -------          | ----           |
-  > | `:username`     | **Username**  |
-  > | `:password`     | **Password**  |
-  > | `:industry_type`     | **IndustryType**  |
-  > | `:merchant_id`     | **MerchantId**  |
-  > | `:terminal_id`     | **TerminalId**  |
-  > | ':bin'     | **Bin**     |
+  > | `:account_type`     | **AccountType**  |
+  > | `:vendor`     | **Vendor**  |
+  > | `:vendor_tx_code`     | **VendorTxCode**  |
   
-  > Your Application config **must include the `[:username, :password, :industry_type, :merchant_id, :terminal_id]` field(s)** and would look
+  > Your Application config **must include the `[:account_type, :vendor, :vendor_tx_code]` field(s)** and would look
   > something like this:
   > 
-  >     config :gringotts, Gringotts.Gateways.Chase,
-  >         username: "your_secret_username"
-  >         password: "your_secret_password"
-  >         industry_type: "your_secret_industry_type"
-  >         merchant_id: "your_secret_merchant_id"
-  >         terminal_id: "your_secret_terminal_id"
-  >         bin: "your_secrent_bin"
-
-  ### Definition of Terms
-
-  - Industry Type: The Industry Type for your merchant account can be found by logging into your Orbital Virtual Terminal and viewing the setup for your merchant ID (MID). Alternatively, you can also contact your Chase Orbital Account Executive or Orbital support to determine which default Industry Type is set up for your MID(s).  
-  - Merchant ID: The merchant ID (MID) is the merchant account number assigned to you by Chase Orbital. If you have more than one Merchant ID number, you can set up multiple gateway configurations for each Merchant ID number.
-  - Terminal ID: Merchant Terminal ID assigned by Chase. All Salem Terminal IDs at present must be ‘001’. PNS Terminal ID’s can be from ‘001’ – ‘999’. Most are ‘001’.
-  - Bin: Transaction Routing Definition Assigned by Chase Paymentech, i.e. Salem is 000001 & PNS is 000002 
+  >     config :gringotts, Gringotts.Gateways.Sagepay,
+  >         account_type: "your_secret_account_type"
+  >         vendor: "your_secret_vendor"
+  >         vendor_tx_code: "your_secret_vendor_tx_code"
   
-  ## Process Flow for Chase
-  If the credit card sent on a purchase is an American Express card, authorization is not required. For all other card types, authorization must be completed before purchase.
-  
-  1. Amex
-     - purchase
-  2. All other card types
-     - authorization
-        - success
-          - purchase
-            - success
-              - succes response
-        - error
-          - report error
-    - error
-      - report error
   
   ## Scope of this module
 
@@ -67,17 +69,17 @@ defmodule Gringotts.Gateways.Chase do
 
   ## Following the examples
 
-  1. First, set up a sample application and configure it to work with Chase.
+  1. First, set up a sample application and configure it to work with Sagepay.
   - You could do that from scratch by following our [Getting Started][gs] guide.
       - To save you time, we recommend [cloning our example
       repo][example] that gives you a pre-configured sample app ready-to-go.
           + You could use the same config or update it the with your "secrets"
-          as described [above](#module-registering-your-monei-account-at-Chase).
+          as described [above](#module-registering-your-monei-account-at-Sagepay).
 
   2. Run an `iex` session with `iex -S mix` and add some variable bindings and
   aliases to it (to save some time):
   ```
-  iex> alias Gringotts.{Response, CreditCard, Gateways.Chase}
+  iex> alias Gringotts.{Response, CreditCard, Gateways.Sagepay}
   iex> card = %CreditCard{first_name: "Jo",
                           last_name: "Doe",
                           number: "4200000000000000",
@@ -90,7 +92,7 @@ defmodule Gringotts.Gateways.Chase do
   We'll be using these in the examples below.
 
   [gs]: https://github.com/aviabird/gringotts/wiki/
-  [home]: https://www.chasepaymentech.com/payment_gateway.html
+  [home]: https://www.sagepay.co.uk/
   [example]: https://github.com/aviabird/gringotts_example
   """
 
@@ -101,16 +103,13 @@ defmodule Gringotts.Gateways.Chase do
   # The Adapter module provides the `validate_config/1`
   # Add the keys that must be present in the Application config in the
   # `required_config` list
-  use Gringotts.Adapter, required_config: [:username, :password, :industry_type, :merchant_id, :terminal_id]
+  use Gringotts.Adapter, required_config: [:account_type, :vendor, :vendor_tx_code]
   
   import Poison, only: [decode: 1]
 
   alias Gringotts.{Money,
                    CreditCard,
                    Response}
-
-  @url "https://orbitalvar1.chasepaymentech.com"
-  # @url "https://orbital1.chasepaymentech.com"
 
   @doc """
   Performs a (pre) Authorize operation.
@@ -139,7 +138,7 @@ defmodule Gringotts.Gateways.Chase do
   @doc """
   Captures a pre-authorized `amount`.
 
-  `amount` is transferred to the merchant account by Chase used in the
+  `amount` is transferred to the merchant account by Sagepay used in the
   pre-authorization referenced by `payment_id`.
 
   ## Note
@@ -159,7 +158,7 @@ defmodule Gringotts.Gateways.Chase do
   @doc """
   Transfers `amount` from the customer to the merchant.
 
-  Chase attempts to process a purchase on behalf of the customer, by
+  Sagepay attempts to process a purchase on behalf of the customer, by
   debiting `amount` from the customer's account by charging the customer's
   `card`.
 
@@ -173,66 +172,7 @@ defmodule Gringotts.Gateways.Chase do
   """
   @spec purchase(Money.t, CreditCard.t(), keyword) :: {:ok | :error, Response}
   def purchase(amount, card = %CreditCard{}, opts) do
-    params = build_transaction(amount, card, opts, "Payment")
-
-    :post
-    |> commit("transactions", params, headers)
-    |> respond()
-  end
-
-  # Returns formatted credit card expiry date from a `Gringotts.Creditcard`
-  defp expiry_date(card) do
-    expiry_date = card.month * 100 + card.year
-    |> Integer.to_string()
-    |> String.pad_leading(4, "0")
-  end
-
-
-  defp build_transaction(amount, card, opts, type) do
-    {currency, value, _} = Money.to_integer(amount)
-    config = Keyword.fetch!(opts, :config)
-    message_type = "AC"
-    terminal_id = "001"
-    currency_code = 840
-    currency_exponent = 2
-    # AccountNum = credit card number (card.number)
-    # CardSecVal = cvv2
-    # Order Number = time <> resv_id
-
-    card_sec_val_ind = case card.brand do
-        "Visa" -> 1
-        "Discover" -> 1
-        _ -> 9
-    end
-
-    "<Request>
-        <NewOrder> 
-          <OrbitalConnectionUsername>" <> config[:username] <> "</OrbitalConnectionUsername> 
-          <OrbitalConnectionPassword>" <> config[:passowrd] <> "</OrbitalConnectionPassword> 
-          <IndustryType>" <> config[:industry_type] <> "</IndustryType>
-          <MessageType>" <> message_type <> "</MessageType>
-          <BIN>" <> config[:bin] <> "</BIN>
-          <MerchantID>" <> config[:merchant_id] <> "</MerchantID>
-          <TerminalID>" <> terminal_id <> "</TerminalID>
-          <CardBrand></CardBrand>
-          <AccountNum>" <> card.number <> "</AccountNum>
-          <Exp>" <> expiry_date(card) <> "</Exp>
-          <CurrencyCode>" <> currency_code <> "</CurrencyCode> 
-          <CurrencyExponent>" <> currency_exponent <> "</CurrencyExponent>
-          " <> card_sec_val_ind <> "
-          <CardSecVal>" <> card.verification_code <> "</CardSecVal>
-          <AVSzip>" <> opts[:zip] <> "</AVSzip>
-          <AVSaddress1>" <> opts[:address1] <> "</AVSaddress1>
-          <AVSaddress2>" <> opts[:address1] <> "</AVSaddress2>
-          <AVScity>" <> opts[:city] <> "</AVScity>
-          <AVSstate>" <> opts[:state] <> "</AVSstate>
-          <AVSphoneNum></AVSphoneNum> 
-          <AVSname>" <> CreditCard.full_name(card) <> "</AVSname>
-          <AVScountryCode>" <> opts[:country] <> "</AVScountryCode>
-          <OrderID>" <> opts[:order_number] <> "</OrderID>
-          <Amount>" <> value <> "</Amount>
-        </NewOrder> 
-      </Request>"
+    # commit(args, ...)
   end
 
   @doc """
@@ -265,7 +205,7 @@ defmodule Gringotts.Gateways.Chase do
   ## Note
 
   > The end customer will usually see two bookings/records on his statement. Is
-  > that true for Chase?
+  > that true for Sagepay?
   > Is there a limited time window within which a void can be perfomed?
 
   ## Example
@@ -317,31 +257,18 @@ defmodule Gringotts.Gateways.Chase do
   #                                PRIVATE METHODS                              #
   ###############################################################################
   
-  # Makes the request to Chase's network.
+  # Makes the request to Sagepay's network.
   # For consistency with other gateway implementations, make your (final)
   # network request in here, and parse it using another private method called
   # `respond`.
-  defp commit(:post, endpoint, params, headers) do
-    HTTPoison.post(@url <> endpoint, params, headers)
+  defp commit(_) do
+    # resp = HTTPoison.request(args, ...)
+    # respond(resp, ...)
   end
 
-  defp commit(:get, endpoint, headers) do
-    HTTPoison.get(@url <> endpoint, headers)
-  end
-
-  defp headers() do
-    [
-      {"Content-type", "application/PTI60"},
-      {"MIME-Version", "1.1"},
-      {"Content-transfer-encoding", "text"},
-      {"Request-number", "1"},
-      {"Document-type", "Request"},
-    ]
-  end
-
-  # Parses Chase's response and returns a `Gringotts.Response` struct
+  # Parses Sagepay's response and returns a `Gringotts.Response` struct
   # in a `:ok`, `:error` tuple.
-  # defp respond(chase.ex_response)
+  # defp respond(sagepay.ex_response)
   defp respond({:ok, %{status_code: 200, body: body}}), do: "something"
   defp respond({:ok, %{status_code: status_code, body: body}}), do: "something"
   defp respond({:error, %HTTPoison.Error{} = error}), do: "something"
