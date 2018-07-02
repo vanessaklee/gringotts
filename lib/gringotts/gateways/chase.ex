@@ -190,7 +190,7 @@ defmodule Gringotts.Gateways.Chase do
 
   defp build_transaction(amount, card, opts, type) do
     {currency, value, _} = Money.to_integer(amount)
-    config = Keyword.fetch!(opts, :config)
+    config = Application.get_env(:gringotts, Gringotts.Gateways.Chase)
     message_type = "AC"
     terminal_id = "001"
     currency_code = 840
