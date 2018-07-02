@@ -88,6 +88,20 @@ case Gringotts.purchase(Monei, amount, card) do
   {:error, %{status_code: error, raw: raw_response}} ->
     IO.puts("Error: #{error}\nRaw:\n#{raw_response}")
 end
+
+In the command line try: 
+iex> alias Gringotts.{Response, CreditCard, Gateways.Chase}
+iex> amount = Money.new(42, :USD)
+iex> card = %CreditCard{
+   first_name: "Harry",
+   last_name: "Potter",
+   number: "4200000000000000",
+   year: 2099, month: 12,
+   verification_code:  "123",
+   brand: "VISA"
+}
+iex> Chase.purchase(amount, card, %{zip: "78757", address1: "123 Pine", address2: nil, city: "Austin", state: "TX", country: "USA", order_number: "123"})
+
 ```
 
 [hexpm]: https://hex.pm/packages/gringotts

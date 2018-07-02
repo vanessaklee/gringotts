@@ -191,51 +191,48 @@ defmodule Gringotts.Gateways.Chase do
   defp build_transaction(amount, card, opts, type) do
     {currency, value, _} = Money.to_integer(amount)
     config = Application.get_env(:gringotts, Gringotts.Gateways.Chase)
-    IO.inspect config
     message_type = "AC"
     terminal_id = "001"
-    currency_code = 840
-    currency_exponent = 2
+    currency_code = "840"
+    currency_exponent = "2"
     # AccountNum = credit card number (card.number)
     # CardSecVal = cvv2
     # Order Number = time <> resv_id
 
     card_sec_val_ind = case card.brand do
-        "Visa" -> 1
-        "Discover" -> 1
-        _ -> 9
+        "Visa" -> "1"
+        "Discover" -> "1"
+        _ -> "9"
     end
 
-    test = "<Request>
-        <NewOrder> 
-          <OrbitalConnectionUsername>" <> config[:username] <> "</OrbitalConnectionUsername> 
-          <OrbitalConnectionPassword>" <> config[:passowrd] <> "</OrbitalConnectionPassword> 
-          <IndustryType>" <> config[:industry_type] <> "</IndustryType>
-          <MessageType>" <> message_type <> "</MessageType>
-          <BIN>" <> config[:bin] <> "</BIN>
-          <MerchantID>" <> config[:merchant_id] <> "</MerchantID>
-          <TerminalID>" <> terminal_id <> "</TerminalID>
-          <CardBrand></CardBrand>
-          <AccountNum>" <> card.number <> "</AccountNum>
-          <Exp>" <> expiry_date(card) <> "</Exp>
-          <CurrencyCode>" <> currency_code <> "</CurrencyCode> 
-          <CurrencyExponent>" <> currency_exponent <> "</CurrencyExponent>
-          " <> card_sec_val_ind <> "
-          <CardSecVal>" <> card.verification_code <> "</CardSecVal>
-          <AVSzip>" <> opts[:zip] <> "</AVSzip>
-          <AVSaddress1>" <> opts[:address1] <> "</AVSaddress1>
-          <AVSaddress2>" <> opts[:address1] <> "</AVSaddress2>
-          <AVScity>" <> opts[:city] <> "</AVScity>
-          <AVSstate>" <> opts[:state] <> "</AVSstate>
-          <AVSphoneNum></AVSphoneNum> 
-          <AVSname>" <> CreditCard.full_name(card) <> "</AVSname>
-          <AVScountryCode>" <> opts[:country] <> "</AVScountryCode>
-          <OrderID>" <> opts[:order_number] <> "</OrderID>
-          <Amount>" <> value <> "</Amount>
-        </NewOrder> 
-      </Request>"
-      IO.inspect test
-      test
+    test = "<Request><NewOrder> 
+        <OrbitalConnectionUsername>" <> config[:username] <> "</OrbitalConnectionUsername> 
+        <OrbitalConnectionPassword>" <> config[:password] <> "</OrbitalConnectionPassword> 
+        <IndustryType>" <> config[:industry_type] <> "</IndustryType>
+        <MessageType>" <> message_type <> "</MessageType>
+        <BIN>" <> config[:bin] <> "</BIN>
+        <MerchantID>" <> config[:merchant_id] <> "</MerchantID>
+        <TerminalID>" <> config[:terminal_id] <> "</TerminalID>
+        <CardBrand></CardBrand>
+        <AccountNum>" <> card.number <> "</AccountNum>
+        <Exp>" <> expiry_date(card) <> "</Exp>
+        <CurrencyCode>" <> currency_code <> "</CurrencyCode> 
+        <CurrencyExponent>" <> currency_exponent <> "</CurrencyExponent>
+        <CardSecValInd>" <> card_sec_val_ind <> "</CardSecValInd>
+        <CardSecVal>" <> card.verification_code <> "</CardSecVal>
+        <AVSzip>" <> opts[:zip] <> "</AVSzip>
+        <AVSaddress1>" <> opts[:address1] <> "</AVSaddress1>
+        <AVSaddress2>" <> opts[:address1] <> "</AVSaddress2>
+        <AVScity>" <> opts[:city] <> "</AVScity>
+        <AVSstate>" <> opts[:state] <> "</AVSstate>
+        <AVSphoneNum></AVSphoneNum> 
+        <AVSname>" <> CreditCard.full_name(card) <> "</AVSname>
+        <AVScountryCode>" <> opts[:country] <> "</AVScountryCode>
+        <OrderID>" <> opts[:order_number] <> "</OrderID>
+        <Amount>" <> to_string(value) <> "</Amount>
+    </NewOrder> </Request>"
+    IO.inspect test
+    test
   end
 
   @doc """
@@ -345,7 +342,7 @@ defmodule Gringotts.Gateways.Chase do
   # Parses Chase's response and returns a `Gringotts.Response` struct
   # in a `:ok`, `:error` tuple.
   # defp respond(chase.ex_response)
-  defp respond({:ok, %{status_code: 200, body: body}}), do: "something"
-  defp respond({:ok, %{status_code: status_code, body: body}}), do: "something"
-  defp respond({:error, %HTTPoison.Error{} = error}), do: "something"
+  defp respond({:ok, %{status_code: 200, body: body}}), do: body
+  defp respond({:ok, %{status_code: status_code, body: body}}), do: body
+  defp respond({:error, %HTTPoison.Error{} = error}), do: error
 end
