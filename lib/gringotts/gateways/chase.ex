@@ -191,6 +191,7 @@ defmodule Gringotts.Gateways.Chase do
   defp build_transaction(amount, card, opts, type) do
     {currency, value, _} = Money.to_integer(amount)
     config = Application.get_env(:gringotts, Gringotts.Gateways.Chase)
+    IO.inspect config
     message_type = "AC"
     terminal_id = "001"
     currency_code = 840
@@ -205,7 +206,7 @@ defmodule Gringotts.Gateways.Chase do
         _ -> 9
     end
 
-    "<Request>
+    test = "<Request>
         <NewOrder> 
           <OrbitalConnectionUsername>" <> config[:username] <> "</OrbitalConnectionUsername> 
           <OrbitalConnectionPassword>" <> config[:passowrd] <> "</OrbitalConnectionPassword> 
@@ -233,6 +234,8 @@ defmodule Gringotts.Gateways.Chase do
           <Amount>" <> value <> "</Amount>
         </NewOrder> 
       </Request>"
+      IO.inspect test
+      test
   end
 
   @doc """
