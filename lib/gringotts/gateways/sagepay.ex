@@ -274,34 +274,6 @@ defmodule Gringotts.Gateways.Sagepay do
             apply_3d_secure = "0"
         end
 
-        # Poison.encode!(%{
-        #     "TxType" => "PAYMENT",
-        #     "Vendor" => vendor(),
-        #     "VendorName" => vendor(),
-        #     "VendorTxCode" => vendor_tx_code,
-        #     "Amount" => value,
-        #     "Currency" => @currency, 
-        #     "Description" => opts[:resv_id],
-        #     "CardHolder" => CreditCard.full_name(card), 
-        #     "CardNumber" => card.number,
-        #     "ExpiryDate" => expiry_date(card),
-        #     "CV2" => card.verification_code,
-        #     "CardType" => card.brand,
-        #     "BillingFirstnames" => CreditCard.full_name(card),
-        #     "BillingSurname" => card.last_name,
-        #     "BillingAddress1" => opts[:address1],
-        #     "BillingCity" => opts[:city],
-        #     "BillingState" => opts[:state],
-        #     "BillingPostCode" => opts[:zip],
-        #     "BillingCountry" => opts[:country],
-        #     # "ClientIPAddress" => opts[:ip_address],
-        #     "GiftAidPayment" => "0",
-        #     "ApplyAVSCV2" => "0",
-        #     "Apply3DSecure" => apply_3d_secure,
-        #     "AccountType" => config[:account_type],
-        #     "IssueNumber" => opts[:issue_number]
-        # }) 
-
         bit_one = "TxType=PAYMENT" <>
             "&Vendor=" <> vendor() <>
             "&VendorTxCode=" <> vendor_tx_code <>
@@ -339,8 +311,6 @@ defmodule Gringotts.Gateways.Sagepay do
             bit_four = bit_three
         end
 
-        IO.inspect URI.encode(bit_four)
-
         URI.encode(bit_four)
     end
 
@@ -354,8 +324,6 @@ defmodule Gringotts.Gateways.Sagepay do
     # `respond`.
     defp commit(:post, url, endpoint, params, headers) do
         options = [ssl: [{:versions, [:'tlsv1.2']}]]
-        IO.inspect url
-        IO.inspect HTTPoison.post(url <> endpoint, params, headers, options)
         HTTPoison.post(url <> endpoint, params, headers, options)
     end
 
