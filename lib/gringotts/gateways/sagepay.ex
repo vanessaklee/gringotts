@@ -111,165 +111,319 @@ defmodule Gringotts.Gateways.Sagepay do
                    CreditCard,
                    Response}
 
-  @doc """
-  Performs a (pre) Authorize operation.
+    @currency "GBP"
 
-  The authorization validates the `card` details with the banking network,
-  places a hold on the transaction `amount` in the customer’s issuing bank.
+    @doc """
+    Performs a (pre) Authorize operation.
 
-  > ** You could perhaps:**
-  > 1. describe what are the important fields in the Response struct
-  > 2. mention what a merchant can do with these important fields (ex:
-  > `capture/3`, etc.)
-  
-  ## Note
+    The authorization validates the `card` details with the banking network,
+    places a hold on the transaction `amount` in the customer’s issuing bank.
 
-  > If there's anything noteworthy about this operation, it comes here.
+    > ** You could perhaps:**
+    > 1. describe what are the important fields in the Response struct
+    > 2. mention what a merchant can do with these important fields (ex:
+    > `capture/3`, etc.)
 
-  ## Example
+    ## Note
 
-  > A barebones example using the bindings you've suggested in the `moduledoc`.
-  """
-  @spec authorize(Money.t(), CreditCard.t(), keyword) :: {:ok | :error, Response}
-  def authorize(amount, card = %CreditCard{}, opts) do
+    > If there's anything noteworthy about this operation, it comes here.
+
+    ## Example
+
+    > A barebones example using the bindings you've suggested in the `moduledoc`.
+    """
+    @spec authorize(Money.t(), CreditCard.t(), keyword) :: {:ok | :error, Response}
+    def authorize(amount, card = %CreditCard{}, opts) do
     # commit(args, ...)
-  end
+    end
 
-  @doc """
-  Captures a pre-authorized `amount`.
+    @doc """
+    Captures a pre-authorized `amount`.
 
-  `amount` is transferred to the merchant account by Sagepay used in the
-  pre-authorization referenced by `payment_id`.
+    `amount` is transferred to the merchant account by Sagepay used in the
+    pre-authorization referenced by `payment_id`.
 
-  ## Note
+    ## Note
 
-  > If there's anything noteworthy about this operation, it comes here.
-  > For example, does the gateway support partial, multiple captures?
+    > If there's anything noteworthy about this operation, it comes here.
+    > For example, does the gateway support partial, multiple captures?
 
-  ## Example
+    ## Example
 
-  > A barebones example using the bindings you've suggested in the `moduledoc`.
-  """
-  @spec capture(String.t(), Money.t, keyword) :: {:ok | :error, Response}
-  def capture(payment_id, amount, opts) do
+    > A barebones example using the bindings you've suggested in the `moduledoc`.
+    """
+    @spec capture(String.t(), Money.t, keyword) :: {:ok | :error, Response}
+    def capture(payment_id, amount, opts) do
     # commit(args, ...)
-  end
+    end
 
-  @doc """
-  Transfers `amount` from the customer to the merchant.
+    @doc """
+    Transfers `amount` from the customer to the merchant.
 
-  Sagepay attempts to process a purchase on behalf of the customer, by
-  debiting `amount` from the customer's account by charging the customer's
-  `card`.
+    Sagepay attempts to process a purchase on behalf of the customer, by
+    debiting `amount` from the customer's account by charging the customer's
+    `card`.
 
-  ## Note
+    ## Note
 
-  > If there's anything noteworthy about this operation, it comes here.
+    > If there's anything noteworthy about this operation, it comes here.
 
-  ## Example
+    ## Example
 
-  > A barebones example using the bindings you've suggested in the `moduledoc`.
-  """
-  @spec purchase(Money.t, CreditCard.t(), keyword) :: {:ok | :error, Response}
-  def purchase(amount, card = %CreditCard{}, opts) do
+    > A barebones example using the bindings you've suggested in the `moduledoc`.
+    """
+    @spec purchase(Money.t, CreditCard.t(), keyword) :: {:ok | :error, Response}
+    def purchase(amount, card = %CreditCard{}, opts) do
+        params = build_transaction(amount, card, opts, "Payment")
+        config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
+
+        :post
+        |> commit(config[:purchase_url] <> "?" <> params, "", params, headers)
+        |> respond()
+    end
+
+    @doc """
+    Voids the referenced payment.
+
+    This method attempts a reversal of a previous transaction referenced by
+    `payment_id`.
+
+    > As a consequence, the customer will never see any booking on his statement.
+
+    ## Note
+
+    > Which transactions can be voided?
+    > Is there a limited time window within which a void can be perfomed?
+
+    ## Example
+
+    > A barebones example using the bindings you've suggested in the `moduledoc`.
+    """
+    @spec void(String.t(), keyword) :: {:ok | :error, Response}
+    def void(payment_id, opts) do
     # commit(args, ...)
-  end
+    end
 
-  @doc """
-  Voids the referenced payment.
+    @doc """
+    Refunds the `amount` to the customer's account with reference to a prior transfer.
 
-  This method attempts a reversal of a previous transaction referenced by
-  `payment_id`.
+    > Refunds are allowed on which kinds of "prior" transactions?
 
-  > As a consequence, the customer will never see any booking on his statement.
+    ## Note
 
-  ## Note
+    > The end customer will usually see two bookings/records on his statement. Is
+    > that true for Sagepay?
+    > Is there a limited time window within which a void can be perfomed?
 
-  > Which transactions can be voided?
-  > Is there a limited time window within which a void can be perfomed?
+    ## Example
 
-  ## Example
-
-  > A barebones example using the bindings you've suggested in the `moduledoc`.
-  """
-  @spec void(String.t(), keyword) :: {:ok | :error, Response}
-  def void(payment_id, opts) do
+    > A barebones example using the bindings you've suggested in the `moduledoc`.
+    """
+    @spec refund(Money.t, String.t(), keyword) :: {:ok | :error, Response}
+    def refund(amount, payment_id, opts) do
     # commit(args, ...)
-  end
+    end
 
-  @doc """
-  Refunds the `amount` to the customer's account with reference to a prior transfer.
+    @doc """
+    Stores the payment-source data for later use.
 
-  > Refunds are allowed on which kinds of "prior" transactions?
+    > This usually enable "One Click" and/or "Recurring Payments"
 
-  ## Note
+    ## Note
 
-  > The end customer will usually see two bookings/records on his statement. Is
-  > that true for Sagepay?
-  > Is there a limited time window within which a void can be perfomed?
+    > If there's anything noteworthy about this operation, it comes here.
 
-  ## Example
+    ## Example
 
-  > A barebones example using the bindings you've suggested in the `moduledoc`.
-  """
-  @spec refund(Money.t, String.t(), keyword) :: {:ok | :error, Response}
-  def refund(amount, payment_id, opts) do
+    > A barebones example using the bindings you've suggested in the `moduledoc`.
+    """
+    @spec store(CreditCard.t(), keyword) :: {:ok | :error, Response}
+    def store(%CreditCard{} = card, opts) do
     # commit(args, ...)
-  end
+    end
 
-  @doc """
-  Stores the payment-source data for later use.
+    @doc """
+    Removes card or payment info that was previously `store/2`d
 
-  > This usually enable "One Click" and/or "Recurring Payments"
+    Deletes previously stored payment-source data.
 
-  ## Note
+    ## Note
 
-  > If there's anything noteworthy about this operation, it comes here.
+    > If there's anything noteworthy about this operation, it comes here.
 
-  ## Example
+    ## Example
 
-  > A barebones example using the bindings you've suggested in the `moduledoc`.
-  """
-  @spec store(CreditCard.t(), keyword) :: {:ok | :error, Response}
-  def store(%CreditCard{} = card, opts) do
-    # commit(args, ...)
-  end
+    > A barebones example using the bindings you've suggested in the `moduledoc`.
+    """
+    @spec unstore(String.t(), keyword) :: {:ok | :error, Response}
+    def unstore(registration_id, opts) do
+        # commit(args, ...)
+    end
 
-  @doc """
-  Removes card or payment info that was previously `store/2`d
+    defp build_transaction(amount, card, opts, type) do
+        {currency, value, _} = Money.to_integer(amount)
+        config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
 
-  Deletes previously stored payment-source data.
+        # VendorTxCode for SagePay - unique identifier; must be saved
+        {:ok, dt} = DateTime.from_naive(NaiveDateTime.utc_now, "Etc/UTC")
+        vendor_tx_code = opts[:resv_id] <> "-" <> Integer.to_string(DateTime.to_unix(dt))
 
-  ## Note
+        if opts[:issue_number] do
+            apply_3d_secure = "2"
+        else 
+            apply_3d_secure = "0"
+        end
 
-  > If there's anything noteworthy about this operation, it comes here.
+        # Poison.encode!(%{
+        #     "TxType" => "PAYMENT",
+        #     "Vendor" => vendor(),
+        #     "VendorName" => vendor(),
+        #     "VendorTxCode" => vendor_tx_code,
+        #     "Amount" => value,
+        #     "Currency" => @currency, 
+        #     "Description" => opts[:resv_id],
+        #     "CardHolder" => CreditCard.full_name(card), 
+        #     "CardNumber" => card.number,
+        #     "ExpiryDate" => expiry_date(card),
+        #     "CV2" => card.verification_code,
+        #     "CardType" => card.brand,
+        #     "BillingFirstnames" => CreditCard.full_name(card),
+        #     "BillingSurname" => card.last_name,
+        #     "BillingAddress1" => opts[:address1],
+        #     "BillingCity" => opts[:city],
+        #     "BillingState" => opts[:state],
+        #     "BillingPostCode" => opts[:zip],
+        #     "BillingCountry" => opts[:country],
+        #     # "ClientIPAddress" => opts[:ip_address],
+        #     "GiftAidPayment" => "0",
+        #     "ApplyAVSCV2" => "0",
+        #     "Apply3DSecure" => apply_3d_secure,
+        #     "AccountType" => config[:account_type],
+        #     "IssueNumber" => opts[:issue_number]
+        # }) 
 
-  ## Example
+        bit_one = "TxType=PAYMENT" <>
+            "&Vendor=" <> vendor() <>
+            "&VendorTxCode=" <> vendor_tx_code <>
+            "&Amount=" <> Integer.to_string(value) <>
+            "&Currency=" <> @currency <> 
+            "&Description=" <> opts[:resv_id] <>
+            "&CardHolder=" <> CreditCard.full_name(card) <> 
+            "&CardNumber=" <> card.number <>
+            "&ExpiryDate=" <> expiry_date(card) <>
+            "&CV2=" <> card.verification_code <>
+            "&CardType=" <> card.brand <>
+            "&BillingFirstnames=" <> CreditCard.full_name(card) <>
+            "&BillingSurname=" <> card.last_name <>
+            "&BillingAddress1=" <> opts[:address1] <>
+            "&BillingCity=" <> opts[:city]
 
-  > A barebones example using the bindings you've suggested in the `moduledoc`.
-  """
-  @spec unstore(String.t(), keyword) :: {:ok | :error, Response}
-  def unstore(registration_id, opts) do
-    # commit(args, ...)
-  end
+        if opts[:state] do
+            bit_two = bit_one <> "&BillingState=" <> opts[:state] 
+        else
+            bit_two = bit_one
+        end
 
-  ###############################################################################
-  #                                PRIVATE METHODS                              #
-  ###############################################################################
-  
-  # Makes the request to Sagepay's network.
-  # For consistency with other gateway implementations, make your (final)
-  # network request in here, and parse it using another private method called
-  # `respond`.
-  defp commit(_) do
-    # resp = HTTPoison.request(args, ...)
-    # respond(resp, ...)
-  end
+        bit_three = bit_two <> 
+            "&BillingPostCode=" <> opts[:zip] <>
+            "&BillingCountry=" <> opts[:country] <>
+            "&ClientIPAddress=" <> opts[:ip_address] <>
+            "&GiftAidPayment=" <> "0" <>
+            "&ApplyAVSCV2=" <> "0" <>
+            "&Apply3DSecure=" <> apply_3d_secure <>
+            "&AccountType=" <> config[:account_type] 
 
-  # Parses Sagepay's response and returns a `Gringotts.Response` struct
-  # in a `:ok`, `:error` tuple.
-  # defp respond(sagepay.ex_response)
-  defp respond({:ok, %{status_code: 200, body: body}}), do: "something"
-  defp respond({:ok, %{status_code: status_code, body: body}}), do: "something"
-  defp respond({:error, %HTTPoison.Error{} = error}), do: "something"
+        if opts[:issue_number] do
+            bit_four = bit_three <> "&IssueNumber=" <> opts[:issue_number]
+        else
+            bit_four = bit_three
+        end
+
+        IO.inspect URI.encode(bit_four)
+
+        URI.encode(bit_four)
+    end
+
+    ###############################################################################
+    #                                PRIVATE METHODS                              #
+    ###############################################################################
+
+    # Makes the request to Sagepay's network.
+    # For consistency with other gateway implementations, make your (final)
+    # network request in here, and parse it using another private method called
+    # `respond`.
+    defp commit(:post, url, endpoint, params, headers) do
+        options = [ssl: [{:versions, [:'tlsv1.2']}]]
+        IO.inspect url
+        IO.inspect HTTPoison.post(url <> endpoint, params, headers, options)
+        HTTPoison.post(url <> endpoint, params, headers, options)
+    end
+
+    defp commit(:get, url, endpoint, headers) do
+        HTTPoison.get(url <> endpoint, headers)
+    end
+
+    defp headers() do
+        [
+            {"Content-type", "application/json"},
+            {"MIME-Version", "1.1"},
+            {"Request-number", "1"},
+            {"Document-type", "Request"},
+        ]
+    end
+
+    # Parses Sagepay's response and returns a `Gringotts.Response` struct
+    # in a `:ok`, `:error` tuple.
+    # defp respond(sagepay.ex_response)
+    defp respond({:ok, %{status_code: 200, body: body}}) do 
+        mapped = map_body(body) 
+        %{status: mapped["Status"], status_code: 200, status_detail: mapped["StatusDetail"], body: body, vpstxid: mapped["VPSTxId"], security_key: mapped["SecurityKey"]}
+    end
+    defp respond({:ok, %{status_code: status_code, body: body}}) do 
+        mapped = map_body(body)
+        %{status: mapped["Status"], status_code: status_code, status_detail: mapped["StatusDetail"], body: body, vpstxid: mapped["VPSTxId"], security_key: mapped["SecurityKey"]} 
+    end
+    defp respond({:error, %HTTPoison.Error{} = error}) do 
+        IO.inspect error
+        error
+    end
+
+    def divide_key_value_pairs(value) do
+        list = String.split(value,"=")
+        key = List.first(list)
+        val = List.last(list)
+        Map.put(%{}, key, val)
+    end
+
+    defp map_body(body) do
+        String.split(body, "\r\n")
+            |> Enum.map(&divide_key_value_pairs/1)
+            |> Enum.reduce(fn x, y -> Map.merge(x, y, fn _k, v1, v2 -> v2 ++ v1 end) end)
+    end
+
+    defp vendor do
+        case PaymentPhoenix.comp_code do
+            1003 -> "traveltis"
+            1006 -> "traveltis"
+            1007 -> "touchdownholida"
+            1008 -> "touchdownholida"
+        end
+    end
+
+    # Returns formatted credit card expiry date from a `Gringotts.Creditcard`
+    defp expiry_date(card) do
+        month = card.month
+        |> Integer.to_string()
+        |> String.pad_leading(2, "0")
+
+        cardyear = card.year
+        |> Integer.to_string()
+        case String.length(cardyear) do
+          4 -> year = String.slice(cardyear, 2..3)
+          _ -> year = cardyear
+        end
+
+        month <> year
+    end
+
 end

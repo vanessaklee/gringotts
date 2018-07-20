@@ -24,13 +24,13 @@ use Mix.Config
 # CHASE
 
 # Test Credentials
-config :gringotts, Gringotts.Gateways.Chase,
-    username: "INTERLINE22",
-    password: "TRAVELPA55",
-    industry_type: "MO",
-    merchant_id: "your_secret_merchant_id",
-    terminal_id: "001",
-    bin: "000002"
+# config :gringotts, Gringotts.Gateways.Chase,
+#     username: "INTERLINE22",
+#     password: "TRAVELPA55",
+#     industry_type: "MO",
+#     merchant_id: "your_secret_merchant_id",
+#     terminal_id: "001",
+#     bin: "000002"
 
 # Production Credentials
 # config :gringotts, Gringotts.Gateways.Chase,
