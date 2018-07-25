@@ -176,15 +176,15 @@ defmodule Gringotts.Gateways.Chase do
     params = build_transaction(amount, card, opts, "Payment")
 
     :post
-    |> commit("transactions", params, headers)
+    |> commit("/transactions", params, headers)
     |> respond()
   end
 
   # Returns formatted credit card expiry date from a `Gringotts.Creditcard`
   defp expiry_date(card) do
-    expiry_date = card.month * 100 + card.year
-    |> Integer.to_string()
-    |> String.pad_leading(4, "0")
+    month = card.month |> Integer.to_string |> String.pad_leading(2, "0")
+    year = card.year |> Integer.to_string |> String.slice(2..4)
+    month <> year
   end
 
 
@@ -231,7 +231,6 @@ defmodule Gringotts.Gateways.Chase do
         <OrderID>" <> opts[:order_number] <> "</OrderID>
         <Amount>" <> to_string(value) <> "</Amount>
     </NewOrder> </Request>"
-    IO.inspect test
     test
   end
 
@@ -322,7 +321,8 @@ defmodule Gringotts.Gateways.Chase do
   # network request in here, and parse it using another private method called
   # `respond`.
   defp commit(:post, endpoint, params, headers) do
-    HTTPoison.post(@url <> endpoint, params, headers)
+    options = [ssl: [{:versions, [:'tlsv1.2']}], recv_timeout: 5500]
+    HTTPoison.post(@url <> endpoint, params, headers, options)
   end
 
   defp commit(:get, endpoint, headers) do

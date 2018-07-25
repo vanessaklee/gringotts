@@ -27,4 +27,4 @@ card = %CreditCard{
    verification_code:  "123",
    brand: "VISA"
 }
-Sagepay.purchase(amount, card, %{resv_id: "10101010", ip_address: "128.10.0.123", zip: "78757", address1: "123 Pine", address2: nil, city: "London", country: "GB", order_number: "123", issue_number: nil})
+Sagepay.purchase(amount, card, %{resv_id: "10101012", ip_address: "128.10.0.123", zip: "78757", address1: "123 Pine", address2: nil, city: "London", country: "GB", order_number: "123", issue_number: nil})
