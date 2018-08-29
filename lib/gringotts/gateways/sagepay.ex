@@ -386,9 +386,9 @@ defmodule Gringotts.Gateways.Sagepay do
 
         cardyear = card.year
         |> Integer.to_string()
-        case String.length(cardyear) do
-          4 -> year = String.slice(cardyear, 2..3)
-          _ -> year = cardyear
+        year = case String.length(cardyear) do
+          4 -> String.slice(cardyear, 2..3)
+          _ -> cardyear
         end
 
         month <> year
