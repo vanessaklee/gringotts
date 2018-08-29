@@ -268,10 +268,10 @@ defmodule Gringotts.Gateways.Sagepay do
         {:ok, dt} = DateTime.from_naive(NaiveDateTime.utc_now, "Etc/UTC")
         vendor_tx_code = opts[:resv_id] <> "-" <> Integer.to_string(DateTime.to_unix(dt))
 
-        if opts[:issue_number] do
-            apply_3d_secure = "2"
+        apply_3d_secure = if opts[:issue_number] do
+            "2"
         else 
-            apply_3d_secure = "0"
+            "0"
         end
 
         bit_one = "TxType=PAYMENT" <>
@@ -305,10 +305,10 @@ defmodule Gringotts.Gateways.Sagepay do
             "&Apply3DSecure=" <> apply_3d_secure <>
             "&AccountType=" <> config[:account_type] 
 
-        if opts[:issue_number] do
-            bit_four = bit_three <> "&IssueNumber=" <> opts[:issue_number]
+        bit_four = if opts[:issue_number] do
+            bit_three <> "&IssueNumber=" <> opts[:issue_number]
         else
-            bit_four = bit_three
+            bit_three
         end
 
         URI.encode(bit_four)
