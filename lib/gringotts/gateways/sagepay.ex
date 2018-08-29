@@ -290,10 +290,10 @@ defmodule Gringotts.Gateways.Sagepay do
             "&BillingAddress1=" <> opts[:address1] <>
             "&BillingCity=" <> opts[:city]
 
-        if opts[:state] do
-            bit_two = bit_one <> "&BillingState=" <> opts[:state] 
+        bit_two = if opts[:state] do
+            bit_one <> "&BillingState=" <> opts[:state] 
         else
-            bit_two = bit_one
+            bit_one
         end
 
         bit_three = bit_two <> 
