@@ -289,7 +289,7 @@ defmodule Gringotts.Gateways.Sagepay do
             "&Amount=" <> Integer.to_string(value) <>
             "&Currency=" <> @currency <> 
             "&Description=" <> opts[:resv_id] <>
-            "&RelatedVPSTxId=" <> papyment_id <>
+            "&RelatedVPSTxId=" <> payment_id <>
             "&RelatedVendorTxCode=" <> opts[:original_gateway_trans_id] <>
             "&RelatedSecurityKey=" <> opts[:original_trans_key] <>
             "&RelatedTxAuthNo=" <> opts[:auth]
