@@ -281,6 +281,8 @@ defmodule Gringotts.Gateways.Sagepay do
         opts = if !Map.has_key?(opts, :original_gateway_trans_id), do: Map.put(opts, :original_gateway_trans_id, ""), else: opts
         opts = if !Map.has_key?(opts, :original_trans_key), do: Map.put(opts, :original_trans_key, ""), else: opts
 
+        IO.inspect opts
+
         xml = "TxType=REFUND" <>
             "&Vendor=" <> vendor(opts[:comp_code]) <>
             "&Amount=" <> Integer.to_string(value) <>
@@ -302,16 +304,12 @@ defmodule Gringotts.Gateways.Sagepay do
     # For consistency with other gateway implementations, make your (final)
     # network request in here, and parse it using another private method called
     # `respond`.
-    defp commit(:post, url, params) do
-        IO.inspect url
-        IO.inspect params
-        IO.inspect headers()
-        
+    def commit(:post, url, params) do
         options = [ssl: [{:versions, [:'tlsv1.2']}]]
         HTTPoison.post(url, params, headers(), options)
     end
 
-    defp headers() do
+    def headers() do
         [
             {"Content-type", "application/json"},
             {"MIME-Version", "1.1"},
@@ -323,15 +321,15 @@ defmodule Gringotts.Gateways.Sagepay do
     # Parses Sagepay's response and returns a `Gringotts.Response` struct
     # in a `:ok`, `:error` tuple.
     # defp respond(sagepay.ex_response)
-    defp respond({:ok, %{status_code: 200, body: body}}) do 
+    def respond({:ok, %{status_code: 200, body: body}}) do 
         mapped = map_body(body) 
         %{status: mapped["Status"], status_code: 200, status_detail: mapped["StatusDetail"], body: body, vpstxid: mapped["VPSTxId"], security_key: mapped["SecurityKey"]}
     end
-    defp respond({:ok, %{status_code: status_code, body: body}}) do 
+    def respond({:ok, %{status_code: status_code, body: body}}) do 
         mapped = map_body(body)
         %{status: mapped["Status"], status_code: status_code, status_detail: mapped["StatusDetail"], body: body, vpstxid: mapped["VPSTxId"], security_key: mapped["SecurityKey"]} 
     end
-    defp respond({:error, %HTTPoison.Error{} = error}) do 
+    def respond({:error, %HTTPoison.Error{} = error}) do 
         IO.inspect error
         error
     end
@@ -343,13 +341,13 @@ defmodule Gringotts.Gateways.Sagepay do
         Map.put(%{}, key, val)
     end
 
-    defp map_body(body) do
+    def map_body(body) do
         String.split(body, "\r\n")
             |> Enum.map(&divide_key_value_pairs/1)
             |> Enum.reduce(fn x, y -> Map.merge(x, y, fn _k, v1, v2 -> v2 ++ v1 end) end)
     end
 
-    defp vendor(comp_code) do
+    def vendor(comp_code) do
         case comp_code do
             1003 -> "traveltis"
             1006 -> "traveltis"
@@ -359,7 +357,7 @@ defmodule Gringotts.Gateways.Sagepay do
     end
 
     # Returns formatted credit card expiry date from a `Gringotts.Creditcard`
-    defp expiry_date(card) do
+    def expiry_date(card) do
         month = card.month
         |> Integer.to_string()
         |> String.pad_leading(2, "0")
