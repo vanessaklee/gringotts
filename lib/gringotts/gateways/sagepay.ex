@@ -153,7 +153,7 @@ defmodule Gringotts.Gateways.Sagepay do
     iex> amount = Money.new(42, :USD)
     iex> card = %CreditCard{first_name: "Harry",last_name: "Potter",number: "4200000000000000",year: 2099, month: 12,verification_code:  "123",brand: "VISA"}
     iex> resp = Sagepay.purchase(amount, card, %{resv_id: "10101010", ip_address: "107.92.60.80", zip: "78757", address1: "123 Pine", address2: nil, city: "London", country: "GB", order_number: "123", issue_number: nil})
-    iex> opts =  %{resv_id: "10101010", auth: resp["TxAuthNo"], original_trans_id: resp["VPSTxId"]})
+    iex> opts =  %{resv_id: "10101010", comp_code: 1003, auth: resp["TxAuthNo"], original_trans_id: resp["VPSTxId"]})
     iex> Sagepay.refund(amount, resp["VPSTxId"], opts)
 
 
@@ -204,8 +204,10 @@ defmodule Gringotts.Gateways.Sagepay do
             "0"
         end
 
+
+
         bit_one = "TxType=PAYMENT" <>
-            "&Vendor=" <> vendor() <>
+            "&Vendor=" <> vendor(opts[:comp_code]) <>
             "&VendorTxCode=" <> vendor_tx_code <>
             "&Amount=" <> Integer.to_string(value) <>
             "&Currency=" <> @currency <> 
@@ -348,8 +350,8 @@ defmodule Gringotts.Gateways.Sagepay do
             |> Enum.reduce(fn x, y -> Map.merge(x, y, fn _k, v1, v2 -> v2 ++ v1 end) end)
     end
 
-    defp vendor do
-        case PaymentPhoenix.comp_code do
+    defp vendor(comp_code) do
+        case comp_code do
             1003 -> "traveltis"
             1006 -> "traveltis"
             1007 -> "touchdownholida"
