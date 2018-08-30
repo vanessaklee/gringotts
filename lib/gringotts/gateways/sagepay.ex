@@ -287,7 +287,7 @@ defmodule Gringotts.Gateways.Sagepay do
         {currency, value, _} = Money.to_integer(amount)
         
         xml = "TxType=REFUND" <>
-            "&Vendor=" <> vendor() <>
+            "&Vendor=" <> vendor(opts[:comp_code]) <>
             "&Amount=" <> Integer.to_string(value) <>
             "&Currency=" <> @currency <> 
             "&Description=" <> opts[:resv_id] <>
