@@ -179,7 +179,7 @@ defmodule Gringotts.Gateways.Sagepay do
     """
     @spec refund(Money.t, String.t(), keyword) :: {:ok | :error, Response}
     def refund(amount, payment_id, opts) do
-        params = build_refund_transaction(amount, card, opts)
+        params = build_refund_transaction(amount, payment_id, opts)
         config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
 
         :post
@@ -281,7 +281,7 @@ defmodule Gringotts.Gateways.Sagepay do
     iex> 
     iex> opts =  %{resv_id: "1234567",ip_address: ip,zip: "78757",address1: "123 Pine",address2: nil,city: "Austin",state: "TX",country: "US",order_number: "123",issue_number: nil}
     """
-    def build_refund_transaction(amount, card, opts) do
+    def build_refund_transaction(amount, payment_id, opts) do
         {currency, value, _} = Money.to_integer(amount)
         
         xml = "TxType=REFUND" <>
@@ -289,8 +289,8 @@ defmodule Gringotts.Gateways.Sagepay do
             "&Amount=" <> Integer.to_string(value) <>
             "&Currency=" <> @currency <> 
             "&Description=" <> opts[:resv_id] <>
-            "&RelatedVPSTxId=" <> opts[:original_trans_id] <>
-            "&RelatedVendorTxCode=" <> opts[:original_trans_id] <>
+            "&RelatedVPSTxId=" <> papyment_id <>
+            "&RelatedVendorTxCode=" <> opts[:original_gateway_trans_id] <>
             "&RelatedSecurityKey=" <> opts[:original_trans_key] <>
             "&RelatedTxAuthNo=" <> opts[:auth]
 
