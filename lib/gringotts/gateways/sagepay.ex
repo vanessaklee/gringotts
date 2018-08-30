@@ -202,13 +202,8 @@ defmodule Gringotts.Gateways.Sagepay do
             "0"
         end
 
-        IO.inspect opts
-        IO.inspect opts[:state]
-        IO.inspect if !Map.has_key?(opts, :state), do: Map.put(opts, :state, "")
-
         opts = if !Map.has_key?(opts, :state), do: Map.put(opts, :state, "")
-
-        IO.inspect opts
+        opts = if !Map.has_key?(opts, :city), do: Map.put(opts, :city, "")
 
         bit_one = "TxType=PAYMENT" <>
             "&Vendor=" <> vendor(opts[:comp_code]) <>
