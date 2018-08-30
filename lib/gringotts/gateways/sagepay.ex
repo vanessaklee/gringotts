@@ -105,8 +105,6 @@ defmodule Gringotts.Gateways.Sagepay do
     # `required_config` list
     use Gringotts.Adapter, required_config: [:account_type, :vendor, :vendor_tx_code]
 
-    import Poison, only: [decode: 1]
-
     alias Gringotts.{Money, CreditCard, Response}
 
     @currency "GBP"
@@ -132,7 +130,7 @@ defmodule Gringotts.Gateways.Sagepay do
         config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
 
         :post
-        |> commit(config[:purchase_url] <> "?" <> params, "", nil, params)
+        |> commit(config[:purchase_url] <> "?" <> params, params)
         |> respond()
     end
 
@@ -152,7 +150,7 @@ defmodule Gringotts.Gateways.Sagepay do
     iex> alias Gringotts.{Response, CreditCard, Gateways.Sagepay}
     iex> amount = Money.new(42, :USD)
     iex> card = %CreditCard{first_name: "Harry",last_name: "Potter",number: "4200000000000000",year: 2099, month: 12,verification_code:  "123",brand: "VISA"}
-    iex> resp = Sagepay.purchase(amount, card, %{resv_id: "10101010", ip_address: "107.92.60.80", zip: "78757", address1: "123 Pine", address2: nil, city: "London", country: "GB", order_number: "123", issue_number: nil})
+    iex> resp = Sagepay.purchase(amount, card, %{resv_id: "10101010", comp_code: 1003, ip_address: "107.92.60.80", zip: "78757", address1: "123 Pine", address2: nil, city: "London", country: "GB", order_number: "123", issue_number: nil})
     iex> opts =  %{resv_id: "10101010", comp_code: 1003, auth: resp["TxAuthNo"], original_trans_id: resp["VPSTxId"]})
     iex> Sagepay.refund(amount, resp["VPSTxId"], opts)
 
@@ -183,7 +181,7 @@ defmodule Gringotts.Gateways.Sagepay do
         config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
 
         :post
-        |> commit(config[:refund_url] <> "?" <> params, "", nil, params)
+        |> commit(config[:refund_url] <> "?" <> params, params)
         |> respond()
     end
 
@@ -191,20 +189,26 @@ defmodule Gringotts.Gateways.Sagepay do
     Builds the xml to send with a gateway charge request
     """
     def build_charge_transaction(amount, card, opts) do
-        {currency, value, _} = Money.to_integer(amount)
+        {_currency, value, _} = Money.to_integer(amount)
         config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
 
         # VendorTxCode for SagePay - unique identifier; must be saved
         {:ok, dt} = DateTime.from_naive(NaiveDateTime.utc_now, "Etc/UTC")
         vendor_tx_code = opts[:resv_id] <> "-" <> Integer.to_string(DateTime.to_unix(dt))
 
-        apply_3d_secure = if opts[:issue_number] do
+        apply_3d_secure = if is_nil(opts[:issue_number]) do
             "2"
         else 
             "0"
         end
 
+        IO.inspect opts
+        IO.inspect opts[:state]
+        IO.inspect if !Map.has_key?(opts, :state), do: Map.put(opts, :state, "")
 
+        opts = if !Map.has_key?(opts, :state), do: Map.put(opts, :state, "")
+
+        IO.inspect opts
 
         bit_one = "TxType=PAYMENT" <>
             "&Vendor=" <> vendor(opts[:comp_code]) <>
@@ -220,15 +224,8 @@ defmodule Gringotts.Gateways.Sagepay do
             "&BillingFirstnames=" <> CreditCard.full_name(card) <>
             "&BillingSurname=" <> card.last_name <>
             "&BillingAddress1=" <> opts[:address1] <>
-            "&BillingCity=" <> opts[:city]
-
-        bit_two = if opts[:state] do
-            bit_one <> "&BillingState=" <> opts[:state] 
-        else
-            bit_one
-        end
-
-        bit_three = bit_two <> 
+            "&BillingCity=" <> opts[:city] <> 
+            "&BillingState=" <> opts[:state] <>
             "&BillingPostCode=" <> opts[:zip] <>
             "&BillingCountry=" <> opts[:country] <>
             "&ClientIPAddress=" <> opts[:ip_address] <>
@@ -237,13 +234,13 @@ defmodule Gringotts.Gateways.Sagepay do
             "&Apply3DSecure=" <> apply_3d_secure <>
             "&AccountType=" <> config[:account_type] 
 
-        bit_four = if opts[:issue_number] do
-            bit_three <> "&IssueNumber=" <> opts[:issue_number]
+        xml = if opts[:issue_number] do
+            bit_one <> "&IssueNumber=" <> opts[:issue_number]
         else
-            bit_three
+            bit_one
         end
 
-        URI.encode(bit_four)
+        URI.encode(xml)
     end
 
     @doc """
@@ -284,7 +281,7 @@ defmodule Gringotts.Gateways.Sagepay do
     iex> opts =  %{resv_id: "1234567",ip_address: ip,zip: "78757",address1: "123 Pine",address2: nil,city: "Austin",state: "TX",country: "US",order_number: "123",issue_number: nil}
     """
     def build_refund_transaction(amount, payment_id, opts) do
-        {currency, value, _} = Money.to_integer(amount)
+        {_currency, value, _} = Money.to_integer(amount)
         
         xml = "TxType=REFUND" <>
             "&Vendor=" <> vendor(opts[:comp_code]) <>
@@ -307,9 +304,13 @@ defmodule Gringotts.Gateways.Sagepay do
     # For consistency with other gateway implementations, make your (final)
     # network request in here, and parse it using another private method called
     # `respond`.
-    defp commit(:post, url, endpoint, params, headers) do
+    defp commit(:post, url, params) do
+        IO.inspect url
+        IO.inspect params
+        IO.inspect headers()
+        
         options = [ssl: [{:versions, [:'tlsv1.2']}]]
-        HTTPoison.post(url <> endpoint, params, headers, options)
+        HTTPoison.post(url, params, headers(), options)
     end
 
     defp headers() do
