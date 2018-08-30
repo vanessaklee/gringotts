@@ -202,10 +202,10 @@ defmodule Gringotts.Gateways.Sagepay do
             "0"
         end
 
-        opts = if !Map.has_key?(opts, :state), do: Map.put(opts, :state, "")
-        opts = if !Map.has_key?(opts, :city), do: Map.put(opts, :city, "")
+        opts = if !Map.has_key?(opts, :state), do: Map.put(opts, :state, ""), else: opts
+        opts = if !Map.has_key?(opts, :city), do: Map.put(opts, :city, ""), else: opts
 
-        bit_one = "TxType=PAYMENT" <>
+        base = "TxType=PAYMENT" <>
             "&Vendor=" <> vendor(opts[:comp_code]) <>
             "&VendorTxCode=" <> vendor_tx_code <>
             "&Amount=" <> Integer.to_string(value) <>
@@ -230,9 +230,9 @@ defmodule Gringotts.Gateways.Sagepay do
             "&AccountType=" <> config[:account_type] 
 
         xml = if opts[:issue_number] do
-            bit_one <> "&IssueNumber=" <> opts[:issue_number]
+            base <> "&IssueNumber=" <> opts[:issue_number]
         else
-            bit_one
+            base
         end
 
         URI.encode(xml)
@@ -278,6 +278,9 @@ defmodule Gringotts.Gateways.Sagepay do
     def build_refund_transaction(amount, payment_id, opts) do
         {_currency, value, _} = Money.to_integer(amount)
         
+        opts = if !Map.has_key?(opts, :original_gateway_trans_id), do: Map.put(opts, :original_gateway_trans_id, ""), else: opts
+        opts = if !Map.has_key?(opts, :original_trans_key), do: Map.put(opts, :original_trans_key, ""), else: opts
+
         xml = "TxType=REFUND" <>
             "&Vendor=" <> vendor(opts[:comp_code]) <>
             "&Amount=" <> Integer.to_string(value) <>
