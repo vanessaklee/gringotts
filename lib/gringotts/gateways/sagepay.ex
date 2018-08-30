@@ -132,7 +132,7 @@ defmodule Gringotts.Gateways.Sagepay do
         config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
 
         :post
-        |> commit(config[:purchase_url] <> "?" <> params, "", params)
+        |> commit(config[:purchase_url] <> "?" <> params, "", nil, params)
         |> respond()
     end
 
@@ -183,7 +183,7 @@ defmodule Gringotts.Gateways.Sagepay do
         config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
 
         :post
-        |> commit(config[:refund_url] <> "?" <> params, "", params)
+        |> commit(config[:refund_url] <> "?" <> params, "", nil, params)
         |> respond()
     end
 
