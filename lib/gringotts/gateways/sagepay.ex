@@ -126,12 +126,16 @@ defmodule Gringotts.Gateways.Sagepay do
     """
     @spec purchase(Money.t, CreditCard.t(), keyword) :: {:ok | :error, Response}
     def purchase(amount, card = %CreditCard{}, opts) do
-        params = build_charge_transaction(amount, card, opts)
+        # VendorTxCode for SagePay - unique identifier; must be saved
+        {:ok, dt} = DateTime.from_naive(NaiveDateTime.utc_now, "Etc/UTC")
+        vendor_tx_code = opts[:resv_id] <> "-" <> Integer.to_string(DateTime.to_unix(dt))
+
+        params = build_charge_transaction(amount, card, vendor_tx_code, opts)
         config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
 
         :post
         |> commit(config[:purchase_url] <> "?" <> params, params)
-        |> respond()
+        |> respond(vendor_tx_code)
     end
 
     @doc """
@@ -182,19 +186,15 @@ defmodule Gringotts.Gateways.Sagepay do
 
         :post
         |> commit(config[:refund_url] <> "?" <> params, params)
-        |> respond()
+        |> respond(opts[:vendor_tx_code])
     end
 
     @doc """
     Builds the xml to send with a gateway charge request
     """
-    def build_charge_transaction(amount, card, opts) do
+    def build_charge_transaction(amount, card, vendor_tx_code, opts) do
         {_currency, value, _} = Money.to_integer(amount)
         config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
-
-        # VendorTxCode for SagePay - unique identifier; must be saved
-        {:ok, dt} = DateTime.from_naive(NaiveDateTime.utc_now, "Etc/UTC")
-        vendor_tx_code = opts[:resv_id] <> "-" <> Integer.to_string(DateTime.to_unix(dt))
 
         apply_3d_secure = if is_nil(opts[:issue_number]) do
             "2"
@@ -321,13 +321,13 @@ defmodule Gringotts.Gateways.Sagepay do
     # Parses Sagepay's response and returns a `Gringotts.Response` struct
     # in a `:ok`, `:error` tuple.
     # defp respond(sagepay.ex_response)
-    def respond({:ok, %{status_code: 200, body: body}}) do 
+    def respond({:ok, %{status_code: 200, body: body}}, vendor_tx_code) do 
         mapped = map_body(body) 
-        %{status: mapped["Status"], status_code: 200, status_detail: mapped["StatusDetail"], body: body, vpstxid: mapped["VPSTxId"], security_key: mapped["SecurityKey"]}
+        %{status: mapped["Status"], status_code: 200, status_detail: mapped["StatusDetail"], body: body, vpstxid: mapped["VPSTxId"], security_key: mapped["SecurityKey"], vendor_tx_code: vendor_tx_code}
     end
-    def respond({:ok, %{status_code: status_code, body: body}}) do 
+    def respond({:ok, %{status_code: status_code, body: body}}, vendor_tx_code) do 
         mapped = map_body(body)
-        %{status: mapped["Status"], status_code: status_code, status_detail: mapped["StatusDetail"], body: body, vpstxid: mapped["VPSTxId"], security_key: mapped["SecurityKey"]} 
+        %{status: mapped["Status"], status_code: status_code, status_detail: mapped["StatusDetail"], body: body, vpstxid: mapped["VPSTxId"], security_key: mapped["SecurityKey"], vendor_tx_code: vendor_tx_code} 
     end
     def respond({:error, %HTTPoison.Error{} = error}) do 
         IO.inspect error
@@ -338,7 +338,7 @@ defmodule Gringotts.Gateways.Sagepay do
         list = String.split(value,"=")
         key = List.first(list)
         val = List.last(list)
-        Map.put(%{}, key, val)
+        Map.put(%{}, String.to_atom(key), val)
     end
 
     def map_body(body) do
