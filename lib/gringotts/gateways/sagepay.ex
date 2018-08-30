@@ -1,161 +1,115 @@
 defmodule Gringotts.Gateways.Sagepay do
-  @moduledoc """
-  [Sagepay][home] gateway implementation.
+    @moduledoc """
+    [Sagepay][home] gateway implementation.
 
-  ## Instructions!
-  
-  ***This is an example `moduledoc`, and suggests some items that should be
-  documented in here.***
+    ## Instructions!
 
-  The quotation boxes like the one below will guide you in writing excellent
-  documentation for your gateway. All our gateways are documented in this manner
-  and we aim to keep our docs as consistent with each other as possible.
-  **Please read them and do as they suggest**. Feel free to add or skip sections
-  though.
+    ***This is an example `moduledoc`, and suggests some items that should be
+    documented in here.***
 
-  If you'd like to make edits to the template docs, they exist at
-  `templates/gateway.eex`. We encourage you to make corrections and open a PR
-  and tag it with the label `template`.
+    The quotation boxes like the one below will guide you in writing excellent
+    documentation for your gateway. All our gateways are documented in this manner
+    and we aim to keep our docs as consistent with each other as possible.
+    **Please read them and do as they suggest**. Feel free to add or skip sections
+    though.
 
-  ***Actual docs begin below this line!***
-  
-  --------------------------------------------------------------------------------
+    If you'd like to make edits to the template docs, they exist at
+    `templates/gateway.eex`. We encourage you to make corrections and open a PR
+    and tag it with the label `template`.
 
-  > List features that have been implemented, and what "actions" they map to as
-  > per the Sagepay gateway docs.
-  > A table suits really well for this.
+    ***Actual docs begin below this line!***
 
-  ## Optional or extra parameters
+    --------------------------------------------------------------------------------
 
-  Most `Gringotts` API calls accept an optional `Keyword` list `opts` to supply
-  optional arguments for transactions with the gateway.
-  
-  > List all available (ie, those that will be supported by this module) keys, a
-  > description of their function/role and whether they have been implemented
-  > and tested.
-  > A table suits really well for this.
+    > List features that have been implemented, and what "actions" they map to as
+    > per the Sagepay gateway docs.
+    > A table suits really well for this.
 
-  ## Registering your Sagepay account at `Gringotts`
+    ## Optional or extra parameters
 
-  Explain how to make an account with the gateway and show how to put the
-  `required_keys` (like authentication info) to the configuration.
-  
-  > Here's how the secrets map to the required configuration parameters for Sagepay:
-  > 
-  > | Config parameter | Sagepay secret   |
-  > | -------          | ----           |
-  > | `:account_type`     | **AccountType**  |
-  > | `:vendor`     | **Vendor**  |
-  > | `:vendor_tx_code`     | **VendorTxCode**  |
-  
-  > Your Application config **must include the `[:account_type, :vendor, :vendor_tx_code]` field(s)** and would look
-  > something like this:
-  > 
-  >     config :gringotts, Gringotts.Gateways.Sagepay,
-  >         account_type: "your_secret_account_type"
-  >         vendor: "your_secret_vendor"
-  >         vendor_tx_code: "your_secret_vendor_tx_code"
-  
-  
-  ## Scope of this module
+    Most `Gringotts` API calls accept an optional `Keyword` list `opts` to supply
+    optional arguments for transactions with the gateway.
 
-  > It's unlikely that your first iteration will support all features of the
-  > gateway, so list down those items that are missing.
+    > List all available (ie, those that will be supported by this module) keys, a
+    > description of their function/role and whether they have been implemented
+    > and tested.
+    > A table suits really well for this.
 
-  ## Supported currencies and countries
+    ## Registering your Sagepay account at `Gringotts`
 
-  > It's enough if you just add a link to the gateway's docs or FAQ that provide
-  > info about this.
+    Explain how to make an account with the gateway and show how to put the
+    `required_keys` (like authentication info) to the configuration.
 
-  ## Following the examples
+    > Here's how the secrets map to the required configuration parameters for Sagepay:
+    > 
+    > | Config parameter | Sagepay secret   |
+    > | -------          | ----           |
+    > | `:account_type`     | **AccountType**  |
+    > | `:vendor`     | **Vendor**  |
+    > | `:vendor_tx_code`     | **VendorTxCode**  |
 
-  1. First, set up a sample application and configure it to work with Sagepay.
-  - You could do that from scratch by following our [Getting Started][gs] guide.
+    > Your Application config **must include the `[:account_type, :vendor, :vendor_tx_code]` field(s)** and would look
+    > something like this:
+    > 
+    >     config :gringotts, Gringotts.Gateways.Sagepay,
+    >         account_type: "your_secret_account_type"
+    >         vendor: "your_secret_vendor"
+    >         vendor_tx_code: "your_secret_vendor_tx_code"
+
+
+    ## Scope of this module
+
+    > It's unlikely that your first iteration will support all features of the
+    > gateway, so list down those items that are missing.
+
+    ## Supported currencies and countries
+
+    > It's enough if you just add a link to the gateway's docs or FAQ that provide
+    > info about this.
+
+    ## Following the examples
+
+    1. First, set up a sample application and configure it to work with Sagepay.
+    - You could do that from scratch by following our [Getting Started][gs] guide.
       - To save you time, we recommend [cloning our example
       repo][example] that gives you a pre-configured sample app ready-to-go.
           + You could use the same config or update it the with your "secrets"
           as described [above](#module-registering-your-monei-account-at-Sagepay).
 
-  2. Run an `iex` session with `iex -S mix` and add some variable bindings and
-  aliases to it (to save some time):
-  ```
-  iex> alias Gringotts.{Response, CreditCard, Gateways.Sagepay}
-  iex> card = %CreditCard{first_name: "Jo",
+    2. Run an `iex` session with `iex -S mix` and add some variable bindings and
+    aliases to it (to save some time):
+    ```
+    iex> alias Gringotts.{Response, CreditCard, Gateways.Sagepay}
+    iex> card = %CreditCard{first_name: "Jo",
                           last_name: "Doe",
                           number: "4200000000000000",
                           year: 2099, month: 12,
                           verification_code: "123", brand: "VISA"}
-  ```
+    ```
 
-  > Add any other frequently used bindings up here.
+    > Add any other frequently used bindings up here.
 
-  We'll be using these in the examples below.
+    We'll be using these in the examples below.
 
-  [gs]: https://github.com/aviabird/gringotts/wiki/
-  [home]: https://www.sagepay.co.uk/
-  [example]: https://github.com/aviabird/gringotts_example
-  """
+    [gs]: https://github.com/aviabird/gringotts/wiki/
+    [home]: https://www.sagepay.co.uk/
+    [example]: https://github.com/aviabird/gringotts_example
+    """
 
-  # The Base module has the (abstract) public API, and some utility
-  # implementations.  
-  use Gringotts.Gateways.Base
+    # The Base module has the (abstract) public API, and some utility
+    # implementations.  
+    use Gringotts.Gateways.Base
 
-  # The Adapter module provides the `validate_config/1`
-  # Add the keys that must be present in the Application config in the
-  # `required_config` list
-  use Gringotts.Adapter, required_config: [:account_type, :vendor, :vendor_tx_code]
-  
-  import Poison, only: [decode: 1]
+    # The Adapter module provides the `validate_config/1`
+    # Add the keys that must be present in the Application config in the
+    # `required_config` list
+    use Gringotts.Adapter, required_config: [:account_type, :vendor, :vendor_tx_code]
 
-  alias Gringotts.{Money,
-                   CreditCard,
-                   Response}
+    import Poison, only: [decode: 1]
+
+    alias Gringotts.{Money, CreditCard, Response}
 
     @currency "GBP"
-
-    @doc """
-    Performs a (pre) Authorize operation.
-
-    The authorization validates the `card` details with the banking network,
-    places a hold on the transaction `amount` in the customer’s issuing bank.
-
-    > ** You could perhaps:**
-    > 1. describe what are the important fields in the Response struct
-    > 2. mention what a merchant can do with these important fields (ex:
-    > `capture/3`, etc.)
-
-    ## Note
-
-    > If there's anything noteworthy about this operation, it comes here.
-
-    ## Example
-
-    > A barebones example using the bindings you've suggested in the `moduledoc`.
-    """
-    @spec authorize(Money.t(), CreditCard.t(), keyword) :: {:ok | :error, Response}
-    def authorize(amount, card = %CreditCard{}, opts) do
-    # commit(args, ...)
-    end
-
-    @doc """
-    Captures a pre-authorized `amount`.
-
-    `amount` is transferred to the merchant account by Sagepay used in the
-    pre-authorization referenced by `payment_id`.
-
-    ## Note
-
-    > If there's anything noteworthy about this operation, it comes here.
-    > For example, does the gateway support partial, multiple captures?
-
-    ## Example
-
-    > A barebones example using the bindings you've suggested in the `moduledoc`.
-    """
-    @spec capture(String.t(), Money.t, keyword) :: {:ok | :error, Response}
-    def capture(payment_id, amount, opts) do
-    # commit(args, ...)
-    end
 
     @doc """
     Transfers `amount` from the customer to the merchant.
@@ -174,34 +128,12 @@ defmodule Gringotts.Gateways.Sagepay do
     """
     @spec purchase(Money.t, CreditCard.t(), keyword) :: {:ok | :error, Response}
     def purchase(amount, card = %CreditCard{}, opts) do
-        params = build_transaction(amount, card, opts, "Payment")
+        params = build_charge_transaction(amount, card, opts)
         config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
 
         :post
-        |> commit(config[:purchase_url] <> "?" <> params, "", params, headers)
+        |> commit(config[:purchase_url] <> "?" <> params, "", params)
         |> respond()
-    end
-
-    @doc """
-    Voids the referenced payment.
-
-    This method attempts a reversal of a previous transaction referenced by
-    `payment_id`.
-
-    > As a consequence, the customer will never see any booking on his statement.
-
-    ## Note
-
-    > Which transactions can be voided?
-    > Is there a limited time window within which a void can be perfomed?
-
-    ## Example
-
-    > A barebones example using the bindings you've suggested in the `moduledoc`.
-    """
-    @spec void(String.t(), keyword) :: {:ok | :error, Response}
-    def void(payment_id, opts) do
-    # commit(args, ...)
     end
 
     @doc """
@@ -215,52 +147,50 @@ defmodule Gringotts.Gateways.Sagepay do
     > that true for Sagepay?
     > Is there a limited time window within which a void can be perfomed?
 
-    ## Example
+    ## Examples
 
-    > A barebones example using the bindings you've suggested in the `moduledoc`.
+    iex> alias Gringotts.{Response, CreditCard, Gateways.Sagepay}
+    iex> amount = Money.new(42, :USD)
+    iex> card = %CreditCard{first_name: "Harry",last_name: "Potter",number: "4200000000000000",year: 2099, month: 12,verification_code:  "123",brand: "VISA"}
+    iex> resp = Sagepay.purchase(amount, card, %{resv_id: "10101010", ip_address: "107.92.60.80", zip: "78757", address1: "123 Pine", address2: nil, city: "London", country: "GB", order_number: "123", issue_number: nil})
+    iex> opts =  %{resv_id: "10101010", auth: resp["TxAuthNo"], original_trans_id: resp["VPSTxId"]})
+    iex> Sagepay.refund(amount, resp["VPSTxId"], opts)
+
+
+    - auth: auth values sent in response to a preauth or charge with auth
+            - corresponds to column `auth` in cc_collect
+            - corresponds to xml field `TxAuthNo` returned by SagePay
+            - ex: 245221
+        - original_trans_id: gateway assigned id for referefence
+            - corresponds to column `echo_ref` in cc_collect
+                - saved as `substr($gateway_response['VPSTxId'],0,23)`
+            - corresponds to xml field `VPSTxId` returned by SagePay
+            - ex: {E18F7492-1FD6-4EF0-E78
+        - original_gateway_trans_id: gateway assigned id for referefence
+            - NOT CURRENTLY SENT WITH REFUND REQUESTS
+            - corresponds to column `echo_ref` in cc_collect
+                - saved as `substr($gateway_response['VPSTxId'],0,23)`
+                - originally created by `time() . '-' . $resv_id;`
+            - ex: {E18F7492-1FD6-4EF0-E78
+        - original_trans_key: secondary security k/v pair
+            - NOT CURRENTLY SENT WITH REFUND REQUESTS
+            - not currently stored in cc_collect
+            - corresponds to xml field `SecurityKey` returned by SagePay
     """
     @spec refund(Money.t, String.t(), keyword) :: {:ok | :error, Response}
     def refund(amount, payment_id, opts) do
-    # commit(args, ...)
+        params = build_refund_transaction(amount, card, opts)
+        config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
+
+        :post
+        |> commit(config[:refund_url] <> "?" <> params, "", params)
+        |> respond()
     end
 
     @doc """
-    Stores the payment-source data for later use.
-
-    > This usually enable "One Click" and/or "Recurring Payments"
-
-    ## Note
-
-    > If there's anything noteworthy about this operation, it comes here.
-
-    ## Example
-
-    > A barebones example using the bindings you've suggested in the `moduledoc`.
+    Builds the xml to send with a gateway charge request
     """
-    @spec store(CreditCard.t(), keyword) :: {:ok | :error, Response}
-    def store(%CreditCard{} = card, opts) do
-    # commit(args, ...)
-    end
-
-    @doc """
-    Removes card or payment info that was previously `store/2`d
-
-    Deletes previously stored payment-source data.
-
-    ## Note
-
-    > If there's anything noteworthy about this operation, it comes here.
-
-    ## Example
-
-    > A barebones example using the bindings you've suggested in the `moduledoc`.
-    """
-    @spec unstore(String.t(), keyword) :: {:ok | :error, Response}
-    def unstore(registration_id, opts) do
-        # commit(args, ...)
-    end
-
-    defp build_transaction(amount, card, opts, type) do
+    def build_charge_transaction(amount, card, opts) do
         {currency, value, _} = Money.to_integer(amount)
         config = Application.get_env(:gringotts, Gringotts.Gateways.Sagepay)
 
@@ -314,6 +244,59 @@ defmodule Gringotts.Gateways.Sagepay do
         URI.encode(bit_four)
     end
 
+    @doc """
+    Builds the xml to send with a gateway refund request
+
+    ## PARAMETERS
+
+    - amount: Money amount to charge
+    - card
+    - opts
+        - auth: auth values sent in response to a preauth or charge with auth
+            - corresponds to column `auth` in cc_collect
+            - corresponds to xml field `TxAuthNo` returned by SagePay
+            - ex: 245221
+        - original_trans_id: gateway assigned id for referefence
+            - corresponds to column `echo_ref` in cc_collect
+                - saved as `substr($gateway_response['VPSTxId'],0,23)`
+            - corresponds to xml field `VPSTxId` returned by SagePay
+            - ex: {E18F7492-1FD6-4EF0-E78
+        - original_gateway_trans_id: gateway assigned id for referefence
+            - NOT CURRENTLY SENT WITH REFUND REQUESTS
+            - corresponds to column `echo_ref` in cc_collect
+                - saved as `substr($gateway_response['VPSTxId'],0,23)`
+                - originally created by `time() . '-' . $resv_id;`
+            - corresponds to xml field `VPSTxId` returned by SagePay
+            - ex: {E18F7492-1FD6-4EF0-E78
+        - original_trans_key: secondary security k/v pair
+            - NOT CURRENTLY SENT WITH REFUND REQUESTS
+            - not currently stored in cc_collect
+            - corresponds to xml field `SecurityKey` returned by SagePay
+        
+    ## Examples
+
+    iex> alias Gringotts.{Response, CreditCard, Gateways.Sagepay}
+    iex> card = %CreditCard{first_name: "Jo",last_name: "Doe",number: "4200000000000000",year: 2099, month: 12,verification_code: "123", brand: "VISA"}
+    iex> opts =  %{resv_id: "1234567",ip_address: ip,zip: "78757",address1: "123 Pine",address2: nil,city: "Austin",state: "TX",country: "US",order_number: "123",issue_number: nil}
+    iex> 
+    iex> opts =  %{resv_id: "1234567",ip_address: ip,zip: "78757",address1: "123 Pine",address2: nil,city: "Austin",state: "TX",country: "US",order_number: "123",issue_number: nil}
+    """
+    def build_refund_transaction(amount, card, opts) do
+        {currency, value, _} = Money.to_integer(amount)
+        
+        xml = "TxType=REFUND" <>
+            "&Vendor=" <> vendor() <>
+            "&Amount=" <> Integer.to_string(value) <>
+            "&Currency=" <> @currency <> 
+            "&Description=" <> opts[:resv_id] <>
+            "&RelatedVPSTxId=" <> opts[:original_trans_id] <>
+            "&RelatedVendorTxCode=" <> opts[:original_trans_id] <>
+            "&RelatedSecurityKey=" <> opts[:original_trans_key] <>
+            "&RelatedTxAuthNo=" <> opts[:auth]
+
+        URI.encode(xml)
+    end
+
     ###############################################################################
     #                                PRIVATE METHODS                              #
     ###############################################################################
@@ -325,10 +308,6 @@ defmodule Gringotts.Gateways.Sagepay do
     defp commit(:post, url, endpoint, params, headers) do
         options = [ssl: [{:versions, [:'tlsv1.2']}]]
         HTTPoison.post(url <> endpoint, params, headers, options)
-    end
-
-    defp commit(:get, url, endpoint, headers) do
-        HTTPoison.get(url <> endpoint, headers)
     end
 
     defp headers() do

@@ -187,7 +187,52 @@ defmodule Gringotts.Gateways.Chase do
     month <> year
   end
 
+      @doc """
+    Builds the xml to send with a gateway refund request
 
+    ## PARAMETERS
+
+    - amount: Money amount to charge
+    - card
+    - opts
+        - auth: auth values sent in response to a preauth or charge with auth
+            - corresponds to column `auth` in cc_collect
+            - corresponds to xml field `TxAuthNo` returned by SagePay
+            - ex: 245221
+        - original_gateway_trans_id: gateway assigned id for referefence
+            - corresponds to column `echo_ref` in cc_collect
+                - saved as `substr($gateway_response['VPSTxId'],0,23)`
+                - originally created by `time() . '-' . $resv_id;`
+            - corresponds to xml field `VPSTxId` returned by SagePay
+            - ex: {E18F7492-1FD6-4EF0-E78
+        - original_trans_id: our transaction id for original charge
+            - corresponds to column `echo_order` in cc_collect
+            - corresponds to xml field `order_number` created to send to SagePay
+        - original_trans_key: secondary security k/v pair
+            - not currently stored in cc_collect
+            - corresponds to xml field `SecurityKey` returned by SagePay
+
+            $order_number = $gateway_response['TxRefNum'];
+            $echo_ref = $gateway_response['OrderID'];
+
+            $auth_code = $res->auth_code;
+            $avs_result = $res->avs_response;
+            $auth_msg = $res->avs_text;
+            
+            $cc_update_sql = "Update cc_collect set proc_status = 'Y',";
+            $cc_update_sql .= "cc_num = null, ";
+            $cc_update_sql .= "cvv_num = null, ";
+            $cc_update_sql .= "auth = '$auth_code',";
+            $cc_update_sql .= "auth_date = now(),";
+            $cc_update_sql .= "avs_rslt = '$avs_result',";
+            $cc_update_sql .= "echo_order = '$order_number',";
+            $cc_update_sql .= "echo_ref = '$echo_ref',";
+            $cc_update_sql .= "credit_msg = '',";
+            $cc_update_sql .= "credit_amt = $cc_data->charge_amt,";
+            $cc_update_sql .= "card_name = '$card_name',";
+            $cc_update_sql .= "last_four_digits = '$last_four_digits'";
+            $cc_update_sql .= " where collect_id = $cc_data->collect_id";
+  """
   defp build_transaction(amount, card, opts, type) do
     {currency, value, _} = Money.to_integer(amount)
     config = Application.get_env(:gringotts, Gringotts.Gateways.Chase)
